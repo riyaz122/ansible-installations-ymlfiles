@@ -1,0 +1,16 @@
+---
+ - hosts: localhost
+   become: yes
+   become_method: sudo
+   tags: [remove]
+   tasks:
+     - name: Stop jenkins Server and Uninstall Jenkins
+       service:
+         name: jenkins
+         state: stopped
+     - name: Uninstall Package
+       package:
+       name: "{{ item }}"
+         state: absent
+       with_items:
+       - jenkins

@@ -1,0 +1,7 @@
+ansible -m ping <nodename or ip>
+ansible -m apt -a 'name=docker.io state=present' localhost
+ansible -m service -a 'name=docker state=start' localhost
+ansible -m docker_container -a 'name=mysqltest image=mysql/msql-server state=started ports=3306:3306' all
+ansible -m pip -a 'name=docker' all
+ansible -m file -a 'path=/etc/profile.d/java.sh start=touch mode=0777' all
+ansible -m copy -a 'src= /opt/kiran.txt dest:/root' server1 

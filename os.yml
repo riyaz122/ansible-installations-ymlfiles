@@ -1,0 +1,29 @@
+---
+ - hosts: localhost
+   become: true
+   tasks:
+     - name: installing apache webserver
+       yum: name=httpd state=present
+       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int < 8
+     - name: installing apache webserver
+       yum: name=httpd state=present
+       when: ansible_os_family == "Ubuntu"
+-------------------------------------------------------------------------------------------------------
+---
+ - hosts: localhost
+   become: true
+   tasks:
+     - name: installing apache webserver
+       yum:
+         name: {item}
+         state: latest
+       with_items:
+         - httpd
+       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int < 8
+     - name: installing apache webserver
+       apt:
+         name: {item}
+         state: latest
+       with_items:
+         - apache2
+       when: ansible_os_family == "Ubuntu"

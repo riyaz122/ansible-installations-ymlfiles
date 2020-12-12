@@ -1,0 +1,93 @@
+---
+- hosts: localhost
+  become: true
+  tasks:
+    - name: Remove old war form webappp
+      shell: rm -rf /opt/apache-tomcat-8.5.43/webapps/*.war
+    - name: download war from jfrog
+      get_url:
+        url: http://5.196.253.52:8081/artifactory/repo/com/tecmax/demo/mavewebappdemo/0.0.1-SNAPSHOT/mavewebappdemo-0.0.1-20190817.071859-2.war
+        dest: /opt/apache-tomcat-8.5.43/webapps
+
+
+
+---
+- hosts: localhost
+  become: true
+  tasks:
+    - name: download war from jfrog
+      get_url:
+        url: http://54.2:8081/artifactory/repo/com/tecmax/demo/mavewebappdemo/0.0.1-SNAPSHOT/mavewebappdemo-0.0.1-20190817.064901-1.war
+        dest: /opt/apache-tomcat-8.5.43/webapps
+    
+ 
+ 
+ ---
+- hosts: localhost
+  become: true
+  tasks:
+    - name: download war from jfrog
+      get_url:
+        url: http://54:8081/artifactory/repo/com/tecmax/demo/mavewebappdemo/0.0.1-SNAPSHOT/mavewebappdemo-0.0.1-20190817.064901-1.war
+        dest: /opt/apache-tomcat-8.5.43/webapps
+ ============================================================================================================================
+[ansible@jfrog ~]$ cat tomcat.yml
+---
+ - hosts: localhost
+   tasks:
+     - name: check tomcat install or not
+       stat:
+         path: /opt/apache-tomcat-8.5.43
+       register: tom_result
+     - name: download tomcat
+       get_url:
+         url: http://mirrors.estointernet.in/apache/tomcat/tomcat-8/v8.5.43/bin/apache-tomcat-8.5.43.tar.gz
+         dest: /opt
+         mode: '777'
+       when: tom_result.stat.exists == False
+     - name: chk tomcat fol exist or not
+       stat:
+         path: /opt/apache-tomcat-8.5.43
+       register: ext_result
+     - name: extract tomcat
+       unarchive:
+         src: /opt/apache-tomcat-8.5.43.tar.gz
+         dest: /opt
+         remote_src: True
+       when: ext_result.stat.exists == False
+     - name: Start service httpd
+       command: /opt/apache-tomcat-8.5.43/bin/startup.sh
+
+
+=============================================================================================================================
+
+
+
+---
+ - hosts: jenkins
+   become: true
+   tasks:
+     - name: Install Java 8 using yum
+       yum:
+         name: java
+         state: present
+       become: true
+     - name: Download Jenkins
+       get_url:
+         url: http://pkg.jenkins-ci.org/redhat/jenkins.repo
+         dest: /etc/yum.repos.d/jenkins.repo
+         mode: 0777
+       become: true
+     - name: Import GPG Key
+       rpm_key:
+         state: present
+         key: https://jenkins-ci.org/redhat/jenkins-ci.org.key
+     - name: Install Jenkins
+       yum:
+         name: jenkins
+         state: present
+     - name: Start Jenkins service and enable
+       service:
+         name: jenkins
+         state: started
+         enabled: yes

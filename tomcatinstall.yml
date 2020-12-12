@@ -1,0 +1,22 @@
+---
+ - hosts: localhost
+   tasks:
+     - name: install java
+       yum: name=java state=installed
+     - name: download tomcat
+       get_url:
+         url: http://www-eu.apache.org/dist/tomcat/tomcat-9/v9.0.7/bin/apache-tomcat-9.0.7.tar.gz
+         dest: /opt
+     - name: untar tomcat
+       unarchive:
+         src: /opt/apache-tomcat-9.0.7.tar.gz
+         dest: /opt
+         remote_src: yes
+     - name: copy file
+       copy: src=/root/tomcat.service dest=/etc/systemd/ mode=0777
+     - name: enable tomcat
+       systemd:
+       name: tomcat
+       enabled: yes
+       state: started
+       become: true

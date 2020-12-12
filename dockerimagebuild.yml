@@ -1,0 +1,9 @@
+---
+ - hosts: localhost
+   tasks:
+   - name: Build springboot image
+     docker_image:
+       path: .
+       name: kiranpayyavuala/myapp
+       tag: v1
+       source: build

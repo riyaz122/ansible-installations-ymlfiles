@@ -1,0 +1,84 @@
+---
+ - hosts: localhost
+   become: true
+   tasks:
+     - name: "Get installed(yum) packages"
+       yum:
+         list=installed
+       register: yum_packages
+     - debug:
+         var: yum_packages
+=======================================================
+---
+ - hosts: localhost
+   become: true
+   tasks:
+     - name: "Get installed(yum) packages"
+       yum:
+         list=installed
+       register: yum_packages
+     - debug:
+         var: yum_packages
+     - copy:
+         content={{yum_packages}}
+         dest=/home/ansible/kiran.csv
+       run_once: yes
+       delegate_to: localhost
+=======================================================
+generate_csv.j2
+{%set s_no = 1 %}
+S.no,Name,Release,Repo
+{% for each in yum_packages.results%}
+{{s_no}},{{each.name}},{{each.release}},{{each.repo}}
+{% set s_no = s_no+1 %}
+{% endfor %}
+========================================================
+---
+ - hosts: localhost
+   become: true
+   tasks:
+     - name: "Get installed(yum) packages"
+       yum:
+         list=installed
+       register: yum_packages
+     - name: Storing the data into csv by using jinja2
+       template:
+         src: generate_csv.j2
+         dest: /home/ansible/output.csv
+       delegate_to: localhost
+=======================================================        
+---
+ - hosts: localhost
+   become: true
+   tasks:
+     - name: "Get installed(rpm) packages"
+       package_facts:
+         manager: rpm
+     - name: show them
+       debug: var=ansible_facts.packages     
+=======================================================       
+---
+ - hosts: localhost
+   tasks:
+     - name: list installed  packages
+       yum:
+         list: abrt*
+       register: abrt_packages
+       when: ansible_os_family == "RedHat"
+     - name: get package info
+       set_fact:
+         packages_installed: "{{abrt_packages|json_query(jsonquery)}}"
+       vars:
+         jsonquery: "results[?yumstate=='installed']"
+     - debug:
+         var: packages_installed
+=========================================================
+---
+ - hosts: localhost
+   tasks:
+     - name: list installed  packages
+       yum:
+       package_facts:
+         manager: "auto"
+     - name: show them
+       debug: var=ansible_facts.packages

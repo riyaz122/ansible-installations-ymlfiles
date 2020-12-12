@@ -1,0 +1,48 @@
+PLAYBOOK FOR GIT INSTALLATION
+``````````````````````````````
+---
+ - hosts: localhost
+   tasks:
+     - name: installing git
+       yum: name=git state=present
+
+PLAYBOOK FOR MULTIPLE PACKAGES INSTALLATION
+````````````````````````````````````````````
+---
+ - hosts: localhost
+   tasks:
+     - name: installing multiple packages
+       yum:
+         name: "{{ packages }}"
+       vars:
+         packages:
+         - httpd
+         - httpd-tools
+         - wget
+         - java
+         - unzip
+
+PLAYBOOK 
+`````````
+
+---
+ - hosts: localhost
+   user: ansible
+   sudo: yes
+   connection: ssh
+   gather_facts: no
+   tasks:
+     - name: installing apache webserver
+       yum:
+       name: httpd
+       state: present          #install the particular version
+       state: absent           #remove the Apache package
+       state: latest           #install the latest version of Apache
+     - name: started httpd service
+       service:
+         name: httpd
+         state: started
+         state: stopped
+         state: restarted
+         state: reloaded
+         enabled: yes
